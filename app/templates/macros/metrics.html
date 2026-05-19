@@ -1,0 +1,386 @@
+{% macro render_metric(metric, can_edit=False, show_rename=False) %}
+{% set prog = metric.progress or {} %}
+{% set cfg  = metric.config  or {} %}
+<div class="t-metric t-metric--{{ metric.type }}"
+     id="metric-{{ metric.id }}"
+     data-metric-id="{{ metric.id }}"
+     data-metric-type="{{ metric.type }}"
+     data-progress='{{ prog | tojson }}'
+     data-config='{{ cfg  | tojson }}'
+     data-grid-col="{{ metric.grid_col }}"
+     data-grid-row="{{ metric.grid_row }}"
+     data-grid-w="{{ metric.grid_w }}"
+     data-grid-h="{{ metric.grid_h }}">
+
+  {# ── Заголовок ── #}
+  <div class="t-metric-header">
+    {% if metric.ai_prompt %}
+    <span class="t-metric-title t-metric-title-clickable" title="Нажмите, чтобы увидеть промт">{{ metric.label }}</span>
+    {% else %}
+    <span class="t-metric-title">{{ metric.label }}</span>
+    {% endif %}
+    {% if can_edit and show_rename %}
+    <button type="button" class="t-metric-rename-btn" title="Переименовать трекер" aria-label="Переименовать трекер">
+      <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+    {% endif %}
+  </div>
+
+  {# ── Кнопка удаления (абсолютная, правый верхний угол) ── #}
+  {% if can_edit %}
+  <button type="button" class="delete-metric-btn" title="Удалить" aria-label="Удалить трекер">
+    <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+  {% endif %}
+
+  <div class="t-metric-body">
+
+  {# ════════════════════════════════════════════════════════════════════════
+     CHECKPOINTS — контрольные точки
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% if metric.type == 'checkpoints' %}
+  {% set total   = cfg.get('total', 0) | int %}
+  {% set checked = prog.get('checked', []) %}
+  {% set done    = checked | length %}
+  {% set pct     = (done / total * 100) | int if total else 0 %}
+  <div class="t-cp-bar-row">
+    <span class="t-cp-fraction">{{ done }}<span class="t-cp-fraction-max">/{{ total }}</span></span>
+    <div class="t-cp-track"><div class="t-cp-fill" style="width:{{ pct }}%"></div></div>
+  </div>
+  <div class="t-cps">
+    {% for i in range(total) %}
+    {% set lbl = cfg.get('labels', [])[i] if cfg.get('labels') and i < (cfg.get('labels') | length) else (i + 1) | string %}
+    {% if can_edit %}
+    <button type="button" class="t-cp {{ 'done' if i in checked else '' }}"
+            data-index="{{ i }}" title="{{ lbl }}" aria-label="Точка {{ lbl }}">{{ lbl }}</button>
+    {% else %}
+    <span class="t-cp {{ 'done' if i in checked else '' }}" title="{{ lbl }}">{{ lbl }}</span>
+    {% endif %}
+    {% endfor %}
+    {% if not total %}<span class="t-metric-empty">Не настроено</span>{% endif %}
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     PROGRESS BAR — накопление баллов
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'progress_bar' %}
+  {% set cur = prog.get('current', 0) %}
+  {% set mx  = cfg.get('max', 100) | float %}
+  {% set pct = [[cur / mx * 100, 0] | max, 100] | min | int if mx else 0 %}
+  <div class="t-pb-wrap">
+    <div class="t-pb-ring-wrap">
+      <svg class="t-pb-ring" viewBox="0 0 80 80">
+        <circle class="t-pb-ring-bg"   cx="40" cy="40" r="34"/>
+        <circle class="t-pb-ring-fill" cx="40" cy="40" r="34"
+                stroke-dasharray="213.6"
+                stroke-dashoffset="{{ ((100 - pct) / 100 * 213.6) | round(1) }}"/>
+      </svg>
+      <span class="t-pb-pct">{{ pct }}%</span>
+    </div>
+    <div class="t-pb-right">
+      <div class="t-pb-val">{{ cur }}<span class="t-pb-val-max"> / {{ mx | int }}{% if cfg.get('unit') %} {{ cfg.get('unit') }}{% endif %}</span></div>
+      {% if can_edit %}
+      <div class="t-pb-input-row">
+        <input type="number" class="t-input t-input-sm progress-input"
+               value="{{ cur }}" min="0" max="{{ mx }}" step="{{ cfg.get('step', 1) }}"
+               aria-label="Текущее значение">
+        <button type="button" class="t-btn t-btn-primary t-btn-sm update-progress-btn" aria-label="Сохранить">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     COUNTER — счётчик
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'counter' %}
+  {% set cur = prog.get('current', 0) %}
+  {% set mx  = cfg.get('max') | int if cfg.get('max') else 0 %}
+  <div class="t-counter-body">
+    <div class="t-counter-main">
+      {% if can_edit %}<button type="button" class="t-counter-btn counter-dec" aria-label="Уменьшить">−</button>{% endif %}
+      <div class="t-counter-display">
+        <span class="t-counter-val">{{ cur }}</span>
+        <span class="t-counter-sub">
+          {%- if mx %}/ {{ mx }}{% endif %}
+          {%- if cfg.get('unit') %} {{ cfg.get('unit') }}{% endif -%}
+        </span>
+      </div>
+      {% if can_edit %}<button type="button" class="t-counter-btn counter-inc" aria-label="Увеличить">+</button>{% endif %}
+    </div>
+    {% if mx %}
+    <div class="t-counter-bar-row">
+      <div class="t-counter-bar-fill" style="width:{{ [[cur / mx * 100, 0] | max, 100] | min | int }}%"></div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     STAGES — этапы
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'stages' %}
+  {% set cur_stage = prog.get('current_stage', 0) %}
+  {% set stages    = cfg.get('stages', []) %}
+  <div class="t-stages">
+    {% for stage in stages %}
+    {% set idx   = loop.index0 %}
+    {% set state = 'done' if idx < cur_stage else ('active' if idx == cur_stage else '') %}
+    <div class="t-stage-item">
+      {% if can_edit %}
+      <button type="button" class="t-stage-btn {{ state }} stage-btn" data-index="{{ idx }}" title="{{ stage }}">
+      {% else %}
+      <div class="t-stage-btn {{ state }}">
+      {% endif %}
+        <span class="t-stage-dot">
+          {% if idx < cur_stage %}
+          <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          {% else %}{{ loop.index }}{% endif %}
+        </span>
+        <span class="t-stage-lbl">{{ stage }}</span>
+      {% if can_edit %}</button>{% else %}</div>{% endif %}
+      {% if not loop.last %}
+      <div class="t-stage-conn {{ 'done' if idx < cur_stage else '' }}"></div>
+      {% endif %}
+    </div>
+    {% else %}
+    <span class="t-metric-empty">Не настроено</span>
+    {% endfor %}
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     CHECKLIST — чеклист
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'checklist' %}
+  {% set checked = prog.get('checked', []) %}
+  {% set items   = cfg.get('items', []) %}
+  {% set pct     = (checked | length / items | length * 100) | int if items else 0 %}
+  <div class="t-cl-bar-row">
+    <div class="t-cl-track"><div class="t-cl-fill" style="width:{{ pct }}%"></div></div>
+    <span class="t-cl-frac">{{ checked | length }}/{{ items | length }}</span>
+  </div>
+  <div class="t-cl-list">
+    {% for item in items %}
+    {% set idx = loop.index0 %}
+    <label class="t-cl-item {{ 'checked' if idx in checked else '' }}" for="cl-{{ metric.id }}-{{ idx }}">
+      <input type="checkbox" class="checklist-item" data-index="{{ idx }}"
+             {{ 'checked' if idx in checked else '' }}
+             {{ 'disabled' if not can_edit else '' }}
+             id="cl-{{ metric.id }}-{{ idx }}" aria-label="{{ item }}">
+      <span class="t-cl-box">
+        <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <span class="t-cl-text">{{ item }}</span>
+    </label>
+    {% else %}
+    <span class="t-metric-empty">Нет пунктов</span>
+    {% endfor %}
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     ATTENDANCE — посещаемость
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'attendance' %}
+  {% set records = prog.get('records', []) %}
+  {% set present = records | selectattr('status', 'equalto', 'present') | list | length %}
+  {% set absent  = records | selectattr('status', 'equalto', 'absent')  | list | length %}
+  {% set excused = records | selectattr('status', 'equalto', 'excused') | list | length %}
+  <div class="t-att-stats">
+    <div class="t-att-stat t-att-stat--present">
+      <span class="t-att-num">{{ present }}</span>
+      <span class="t-att-lbl">Присут.</span>
+    </div>
+    <div class="t-att-stat t-att-stat--absent">
+      <span class="t-att-num">{{ absent }}</span>
+      <span class="t-att-lbl">Пропуск</span>
+    </div>
+    <div class="t-att-stat t-att-stat--excused">
+      <span class="t-att-num">{{ excused }}</span>
+      <span class="t-att-lbl">Уваж.</span>
+    </div>
+  </div>
+  <div class="t-att-dots">
+    {% for rec in records[-40:] %}
+    <span class="t-att-dot t-att-dot--{{ rec.status }}" title="{{ rec.date }}"></span>
+    {% endfor %}
+  </div>
+  {% if can_edit %}
+  <div class="t-att-form">
+    <input type="date" class="t-input t-input-sm att-date" aria-label="Дата">
+    <select class="t-select t-select-sm att-status" aria-label="Статус">
+      <option value="present">Присут.</option>
+      <option value="absent">Пропуск</option>
+      <option value="excused">Уваж.</option>
+    </select>
+    <button type="button" class="t-btn t-btn-primary t-btn-sm add-att-btn" aria-label="Добавить">+</button>
+  </div>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════════
+     GRADES — оценки
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'grades' %}
+  {% set grades = prog.get('grades', {}) %}
+  {% set works  = cfg.get('works', []) %}
+  {% set max_gr = cfg.get('max_grade', 5) | float %}
+  <div class="t-gr-list">
+    {% for work in works %}
+    {% set val = grades.get(work.name, '') %}
+    {% set pct = (val | float / max_gr * 100) | int if val != '' else 0 %}
+    <div class="t-gr-row">
+      <span class="t-gr-name" title="{{ work.name }}">{{ work.name }}</span>
+      <div class="t-gr-track"><div class="t-gr-fill" style="width:{{ pct }}%"></div></div>
+      <input type="number" class="t-input t-input-sm t-gr-input grade-input"
+             data-work="{{ work.name }}" value="{{ val }}"
+             min="0" max="{{ max_gr }}" aria-label="Оценка за {{ work.name }}"
+             {{ 'disabled' if not can_edit else '' }}>
+    </div>
+    {% else %}
+    <span class="t-metric-empty">Нет работ</span>
+    {% endfor %}
+  </div>
+  {% if works and can_edit %}
+  <button type="button" class="t-btn t-btn-primary t-btn-sm t-gr-save save-grades-btn">Сохранить</button>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════════
+     DEADLINES — дедлайны
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'deadlines' %}
+  {% set completed = prog.get('completed', []) %}
+  {% set items     = cfg.get('items', []) %}
+  {% set pct       = (completed | length / items | length * 100) | int if items else 0 %}
+  <div class="t-dl-bar-row">
+    <div class="t-dl-track"><div class="t-dl-fill" style="width:{{ pct }}%"></div></div>
+    <span class="t-dl-frac">{{ completed | length }}/{{ items | length }}</span>
+  </div>
+  <div class="t-dl-list">
+    {% for item in items %}
+    {% set idx = loop.index0 %}
+    <label class="t-dl-item {{ 'done' if idx in completed else '' }}" for="dl-{{ metric.id }}-{{ idx }}">
+      <input type="checkbox" class="deadline-item" data-index="{{ idx }}"
+             {{ 'checked' if idx in completed else '' }}
+             {{ 'disabled' if not can_edit else '' }}
+             id="dl-{{ metric.id }}-{{ idx }}" aria-label="{{ item.name }}">
+      <span class="t-dl-box">
+        <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <span class="t-dl-name">{{ item.name }}</span>
+      {% if item.get('date') %}<span class="t-dl-date">{{ item.date }}</span>{% endif %}
+    </label>
+    {% else %}
+    <span class="t-metric-empty">Нет дедлайнов</span>
+    {% endfor %}
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     STREAK — серия
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'streak' %}
+  {% set count = prog.get('records', []) | length %}
+  <div class="t-streak-body">
+    <div class="t-streak-flame">🔥</div>
+    <div class="t-streak-num">{{ count }}</div>
+    <div class="t-streak-lbl">{{ 'день' if count % 10 == 1 and count % 100 != 11 else ('дня' if count % 10 in [2,3,4] and count % 100 not in [12,13,14] else 'дней') }} подряд</div>
+  </div>
+  {% if can_edit %}
+  <button type="button" class="t-btn t-btn-outline t-btn-sm t-streak-btn mark-today-btn">
+    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    Отметить сегодня
+  </button>
+  {% endif %}
+
+  {# ════════════════════════════════════════════════════════════════════════
+     EFFORT HOURS — трудозатраты
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'effort_hours' %}
+  {% set total = prog.get('hours', 0) %}
+  {% set goal  = cfg.get('goal_hours', 0) | float %}
+  {% set pct   = [[total / goal * 100, 0] | max, 100] | min | int if goal else 0 %}
+  <div class="t-ef-wrap">
+    <div class="t-ef-left">
+      <div class="t-ef-num">{{ total }}<span class="t-ef-unit">ч</span></div>
+      {% if goal %}<div class="t-ef-goal">цель: {{ goal | int }}ч</div>{% endif %}
+    </div>
+    <div class="t-ef-right">
+      {% if goal %}
+      <div class="t-ef-bar-wrap">
+        <div class="t-ef-bar-fill" style="width:{{ pct }}%"></div>
+        <span class="t-ef-bar-pct">{{ pct }}%</span>
+      </div>
+      {% endif %}
+      {% if can_edit %}
+      <div class="t-ef-input-row">
+        <input type="number" class="t-input t-input-sm effort-input"
+               placeholder="+ч" min="0.5" step="0.5" aria-label="Добавить часы">
+        <button type="button" class="t-btn t-btn-primary t-btn-sm add-effort-btn">+</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════════
+     RATING HISTORY — история оценок
+     ════════════════════════════════════════════════════════════════════════ #}
+  {% elif metric.type == 'rating_history' %}
+  {% set entries = prog.get('entries', []) %}
+  {% set scale   = cfg.get('scale', 5) | float %}
+  {% if entries %}
+  {% set last = entries[-1] %}
+  {% set avg  = (entries | sum(attribute='grade') / entries | length) | round(1) %}
+  {% endif %}
+
+  {# gh-1: только большая оценка — центральный вид #}
+  <div class="t-rh-center">
+    {% if entries %}
+    <div class="t-rh-big-val">{{ last.grade }}</div>
+    <div class="t-rh-big-scale">/ {{ scale | int }}</div>
+    <div class="t-rh-big-avg">ср. {{ avg }}</div>
+    {% else %}
+    <span class="t-metric-empty">Нет записей</span>
+    {% endif %}
+  </div>
+
+  {# gh-2+: разделённый вид #}
+  <div class="t-rh-wrap">
+    <div class="t-rh-left">
+      {% if entries %}
+      <div class="t-rh-last-val">{{ last.grade }}</div>
+      <div class="t-rh-last-scale">/ {{ scale | int }}</div>
+      <div class="t-rh-avg-lbl">ср.</div>
+      <div class="t-rh-avg">{{ avg }}</div>
+      {% else %}
+      <span class="t-metric-empty" style="font-size:9px">—</span>
+      {% endif %}
+    </div>
+    <div class="t-rh-right">
+      <div class="t-rh-list">
+        {% for entry in entries | reverse %}
+        {% set pct = (entry.grade / scale * 100) | int %}
+        <div class="t-rh-row">
+          <span class="t-rh-date">{{ entry.date }}</span>
+          <div class="t-rh-track"><div class="t-rh-fill" style="width:{{ pct }}%"></div></div>
+          <span class="t-rh-val">{{ entry.grade }}</span>
+        </div>
+        {% else %}
+        <span class="t-metric-empty">Нет записей</span>
+        {% endfor %}
+      </div>
+      {% if can_edit %}
+      <div class="t-rh-form">
+        <input type="date" class="t-input t-input-sm rating-date" aria-label="Дата">
+        <input type="number" class="t-input t-input-sm rating-grade"
+               placeholder="Оц." min="1" max="{{ scale | int }}" aria-label="Оценка">
+        <button type="button" class="t-btn t-btn-primary t-btn-sm add-rating-btn" aria-label="+">+</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% endif %}
+  </div>{# /t-metric-body #}
+</div>
+{% endmacro %}

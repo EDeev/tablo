@@ -1,0 +1,63 @@
+/* ═══ Навбар ════════════════════════════════════════════════════════════════ */
+.t-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.t-brand {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+.t-brand-tab {
+  color: var(--ink);
+}
+.t-brand-lo {
+  background: var(--green);
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 5px 3px;
+  margin-left: 1px;
+  line-height: 1;
+}
+
+.t-nav-r {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Все кнопки в правой части навбара — одинаковая высота */
+.t-nav-r .t-btn,
+.t-nav-r .t-btn-icon {
+  height: 32px;
+}
+.t-nav-r .t-btn {
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+.t-nav-r .t-btn-icon {
+  padding: 0 8px;
+  width: auto;
+}
+
+.t-nav-user { font-size: 12px; color: var(--muted); }
+
+/* Переключатель темы — иконки */
+.t-theme-toggle { font-size: 15px; }
+[data-theme="dark"]  .t-icon-sun  { display: block; }
+[data-theme="dark"]  .t-icon-moon { display: none; }
+[data-theme="light"] .t-icon-sun  { display: none; }
+[data-theme="light"] .t-icon-moon { display: block; }
+.t-icon-sun, .t-icon-moon { display: none; }

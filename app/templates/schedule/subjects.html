@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+{% block title %}Предметы — {{ schedule.name }}{% endblock %}
+
+{% block nav_extra %}
+<a class="t-btn t-btn-ghost" href="{{ url_for('schedules.view', schedule_id=schedule.id) }}">
+  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+  Расписание
+</a>
+{% if can_edit %}
+<button type="button" class="t-btn t-btn-outline t-edit-btn" id="edit-mode-btn" title="Режим редактирования">
+  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+  Редактировать
+</button>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% from "macros/metrics.html" import render_metric %}
+
+<div class="t-ph">
+  <div class="t-ph-name-row">
+    <h1 class="t-ph-title">Предметы</h1>
+    <span class="t-muted">{{ schedule.name }}</span>
+  </div>
+</div>
+
+{% if not schedule.data %}
+<div class="t-empty">
+  <div class="t-empty-icon">📋</div>
+  <p>В расписании нет предметов</p>
+</div>
+{% else %}
+
+<div class="t-subj-grid">
+  {% for item in schedule.data %}
+  {% set subj = item.subject %}
+  {% set cfg = configs.get(subj) %}
+  {% set pidx = loop.index0 %}
+
+  {% set is_completed = cfg and cfg.completed %}
+  <div class="t-subj-card {{ 'subject-hidden' if cfg and cfg.hidden else '' }} {{ 'subject-completed' if is_completed else '' }}" data-subject="{{ subj }}">
+
+    {# ── Шапка карточки ── #}
+    <div class="t-subj-head">
+      <div class="t-subj-head-left">
+        <div class="t-subj-type-dots">
+          {% for type_name, type_data in item.get('types', {}).items() %}
+          {% set color = type_data.get('color', 'gray') if type_data is mapping and 'color' in type_data else 'gray' %}
+          <span class="t-type t-type-{{ color }}">{{ type_name }}</span>
+          {% endfor %}
+        </div>
+        <span class="t-subj-name subject-name-display">{{ subj }}</span>
+        {% if cfg and cfg.completion_type %}
+        <span class="t-completion-badge t-completion-{{ cfg.completion_type | replace(' ', '_') | replace('.', '') | lower }}">{{ cfg.completion_type }}</span>
+        {% endif %}
+        {% if is_completed %}
+        <span class="t-completed-badge">Завершён</span>
+        {% endif %}
+      </div>
+      <div class="t-subj-head-actions {% if can_edit %}edit-ctrl{% endif %}">
+        {% if can_edit %}
+        <button type="button" class="t-btn-icon toggle-completed-btn {{ 'is-completed' if is_completed else '' }}"
+                title="{{ 'Возобновить предмет' if is_completed else 'Отметить как завершённый' }}"
+                data-schedule="{{ schedule.id }}" data-subject="{{ subj }}">
+          {% if is_completed %}
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          {% else %}
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="20 6 9 17 4 12" opacity=".3"/></svg>
+          {% endif %}
+        </button>
+        <button type="button" class="t-btn-icon toggle-visibility-btn {{ 'subject-hidden' if cfg and cfg.hidden else '' }}"
+                title="{{ 'Показать в расписании' if cfg and cfg.hidden else 'Скрыть из расписания' }}"
+                data-schedule="{{ schedule.id }}" data-subject="{{ subj }}"
+                data-hidden="{{ 'true' if cfg and cfg.hidden else 'false' }}">
+          {% if cfg and cfg.hidden %}
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          {% else %}
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          {% endif %}
+        </button>
+        <button type="button" class="t-btn-icon rename-subject-btn" title="Переименовать предмет"
+                data-schedule="{{ schedule.id }}" data-subject="{{ subj }}">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button type="button" class="t-btn-icon danger delete-subject-btn" title="Удалить предмет"
+                data-schedule="{{ schedule.id }}" data-subject="{{ subj }}">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Описание ── #}
+    <div class="t-subj-section subject-description" data-schedule="{{ schedule.id }}" data-subject="{{ subj }}">
+      <p class="description-text t-subj-desc {% if not (cfg and cfg.description) %}text-muted t-desc-italic{% endif %}">
+        {{ cfg.description if cfg and cfg.description else 'Нет описания' }}
+      </p>
+      {% if can_edit %}
+      <button type="button" class="t-btn t-btn-ghost t-btn-xs edit-ctrl edit-desc-btn">Изменить описание</button>
+      <div class="edit-desc-form t-subject-desc-form">
+        <textarea class="t-input t-textarea desc-input" rows="2"
+                  aria-label="Описание предмета">{{ cfg.description if cfg and cfg.description else '' }}</textarea>
+        <div class="t-subj-desc-actions">
+          <button type="button" class="t-btn t-btn-primary t-btn-sm save-desc-btn">Сохранить</button>
+          <button type="button" class="t-btn t-btn-outline t-btn-sm cancel-desc-btn">Отмена</button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── Мета: тип сдачи + ссылка СДО ── #}
+    <div class="t-subj-section t-subj-meta-section" data-schedule="{{ schedule.id }}" data-subject="{{ subj }}">
+      <div class="t-subj-meta-row">
+        {# Тип сдачи #}
+        <div class="t-subj-meta-item">
+          <span class="t-subj-meta-label">Тип сдачи</span>
+          {% if can_edit %}
+          <select class="t-select t-select-sm completion-type-select"
+                  data-schedule="{{ schedule.id }}" data-subject="{{ subj }}"
+                  aria-label="Тип сдачи">
+            <option value="">— не указан —</option>
+            {% for ct in completion_types %}
+            <option value="{{ ct }}" {{ 'selected' if cfg and cfg.completion_type == ct else '' }}>{{ ct }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <span class="t-subj-meta-value">{{ (cfg.completion_type if cfg and cfg.completion_type else '—') }}</span>
+          {% endif %}
+        </div>
+        {# Ссылка СДО #}
+        <div class="t-subj-meta-item t-subj-meta-sdo">
+          <span class="t-subj-meta-label">СДО</span>
+          {% if can_edit %}
+          <div class="t-subj-sdo-edit">
+            <input type="url" class="t-input t-input-sm sdo-url-input"
+                   value="{{ cfg.sdo_url if cfg and cfg.sdo_url else '' }}"
+                   placeholder="https://..." aria-label="Ссылка на СДО">
+            <button type="button" class="t-btn t-btn-primary t-btn-sm save-sdo-btn" title="Сохранить ссылку">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            {% if cfg and cfg.sdo_url %}
+            <a href="{{ cfg.sdo_url }}" target="_blank" rel="noopener noreferrer"
+               class="t-btn t-btn-outline t-btn-sm" title="Открыть СДО">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+            {% endif %}
+          </div>
+          {% else %}
+            {% if cfg and cfg.sdo_url %}
+            <a href="{{ cfg.sdo_url }}" target="_blank" rel="noopener noreferrer" class="t-subj-sdo-link">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Открыть
+            </a>
+            {% else %}
+            <span class="t-subj-meta-value">—</span>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ── Расписание: по типам и периодам ── #}
+    {% for type_name, type_data in item.get('types', {}).items() %}
+    {% set color = type_data.get('color', 'gray') if type_data is mapping and 'color' in type_data else 'gray' %}
+    {% set date_ranges = type_data.get('dates', type_data) if type_data is mapping and 'dates' in type_data else type_data %}
+
+    {% for dr, slots in date_ranges.items() %}
+    <div class="t-subj-section t-subj-slots-section"
+         data-subject="{{ subj }}"
+         data-type="{{ type_name }}"
+         data-period="{{ dr }}"
+         data-schedule="{{ schedule.id }}">
+
+      {# Заголовок секции: тип + период #}
+      <div class="t-subj-slots-head">
+        <span class="t-type t-type-{{ color }}">{{ type_name }}</span>
+        <span class="t-subj-period-display fs-small mono">{{ dr }}</span>
+        {% if can_edit %}
+        <button type="button" class="t-btn-icon edit-ctrl edit-period-btn" title="Изменить период">
+          <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </button>
+        <div class="t-subj-period-form hidden">
+          <div class="t-input-group">
+            <input type="text" class="t-input t-input-sm period-input" value="{{ dr }}"
+                   placeholder="01.09-31.01" aria-label="Период">
+            <button type="button" class="t-btn t-btn-primary t-btn-group-end save-period-btn">✓</button>
+          </div>
+        </div>
+        {% endif %}
+        {% if can_edit %}
+        <button type="button" class="t-btn t-btn-outline t-btn-xs edit-ctrl add-slot-btn ml-auto"
+                title="Добавить строку"
+                data-schedule="{{ schedule.id }}" data-subject="{{ subj }}"
+                data-type="{{ type_name }}" data-period="{{ dr }}">
+          + Строка
+        </button>
+        {% endif %}
+      </div>
+
+      {# Таблица слотов #}
+      <table class="t-table t-subj-slot-table">
+        <thead>
+          <tr>
+            <th scope="col">День</th>
+            <th scope="col">Время</th>
+            <th scope="col">Кабинет</th>
+            <th scope="col">Преподаватель</th>
+            {% if can_edit %}<th scope="col" class="t-table-actions"><span class="hidden">Действия</span></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody class="slots-tbody">
+          {% for slot in slots %}
+          {% set slot_day   = slot[0] if slot|length > 0 else '' %}
+          {% set slot_time  = slot[1] if slot|length > 1 else '' %}
+          {% set slot_room  = slot[2] if slot|length > 2 and slot[2] else '' %}
+          {% set slot_teach = slot[3] if slot|length > 3 and slot[3] else '' %}
+          <tr class="t-slot-row"
+              data-day="{{ slot_day }}"
+              data-time="{{ slot_time }}"
+              data-type="{{ type_name }}"
+              data-period="{{ dr }}"
+              data-subject="{{ subj }}"
+              data-schedule="{{ schedule.id }}">
+            {# Режим просмотра #}
+            <td class="slot-view-day">{{ slot_day | capitalize }}</td>
+            <td class="slot-view-time mono fs-small">{{ slot_time or '—' }}</td>
+            <td class="slot-view-room">{{ slot_room or '—' }}</td>
+            <td class="slot-view-teach">{{ slot_teach or '—' }}</td>
+            {% if can_edit %}
+            <td>
+              <div class="t-table-actions-cell edit-ctrl">
+                <button type="button" class="t-btn-icon slot-inline-edit-btn" title="Редактировать строку">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button type="button" class="t-btn-icon danger slot-delete-btn" title="Удалить строку"
+                        data-schedule="{{ schedule.id }}" data-subject="{{ subj }}"
+                        data-day="{{ slot_day }}" data-time="{{ slot_time }}"
+                        data-type="{{ type_name }}" data-daterange="{{ dr }}">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </td>
+            {% endif %}
+          </tr>
+          {# Строка редактирования — скрыта по умолчанию #}
+          {% if can_edit %}
+          <tr class="t-slot-edit-row hidden"
+              data-day="{{ slot_day }}"
+              data-time="{{ slot_time }}"
+              data-type="{{ type_name }}"
+              data-period="{{ dr }}"
+              data-subject="{{ subj }}"
+              data-schedule="{{ schedule.id }}">
+            <td><input type="text" class="t-input t-input-sm edit-day" value="{{ slot_day }}" placeholder="пн" aria-label="День"></td>
+            <td><input type="text" class="t-input t-input-sm edit-time" value="{{ slot_time }}" placeholder="09:00-10:30" aria-label="Время"></td>
+            <td><input type="text" class="t-input t-input-sm edit-room" value="{{ slot_room }}" placeholder="Кабинет" aria-label="Кабинет"></td>
+            <td><input type="text" class="t-input t-input-sm edit-teach" value="{{ slot_teach }}" placeholder="Преподаватель" aria-label="Преподаватель"></td>
+            <td>
+              <div class="t-slot-edit-save-row">
+                <button type="button" class="t-btn-icon slot-save-btn" title="Сохранить">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button type="button" class="t-btn-icon slot-cancel-btn" title="Отмена">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+    {% endfor %}
+
+    {# ── Кнопка добавить новый тип/период (для можно расширить позже) ── #}
+
+    {# ── Трекеры ── #}
+    <div class="t-subj-section">
+      <div class="t-subj-section-head">
+        <div class="t-subj-section-title">Трекеры</div>
+        {% if can_edit %}
+        <button type="button" class="t-grid-edit-btn subj-grid-edit-btn"
+                data-grid="metrics-subj-{{ pidx }}" title="Редактировать расположение">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Расположение
+        </button>
+        {% endif %}
+      </div>
+      <div class="t-metrics-grid" id="metrics-subj-{{ pidx }}"
+           data-context="subject" data-schedule="{{ schedule.id }}">
+        {% if cfg %}
+          {% for metric in cfg.metrics %}
+            {{ render_metric(metric, can_edit, show_rename=True) }}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% if can_edit %}
+      <div class="add-metric-section t-subj-add-metric"
+           data-schedule="{{ schedule.id }}" data-subject="{{ subj }}"
+           data-slot="subj-{{ pidx }}">
+        <div class="t-add-metric-btns">
+          <button type="button" class="t-btn t-btn-outline t-btn-sm ai-metric-btn">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            AI
+          </button>
+          <button type="button" class="t-btn t-btn-outline t-btn-sm manual-metric-btn">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Добавить трекер
+          </button>
+        </div>
+        <div class="ai-metric-form t-metric-form">
+          <div class="t-input-group">
+            <input type="text" class="t-input t-input-sm ai-prompt-input"
+                   placeholder="Напр: 12 лабораторных работ"
+                   aria-label="Описание для AI-генерации трекера">
+            <button type="button" class="t-btn t-btn-primary t-ai-submit ai-prompt-submit" title="Сгенерировать трекер">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="manual-metric-form t-metric-form">
+          <div class="t-two-col">
+            <select class="t-select t-select-sm metric-type-select" aria-label="Тип трекера">
+              <option value="">Тип трекера</option>
+              <option value="checkpoints">Контрольные точки</option>
+              <option value="progress_bar">Накопление баллов</option>
+              <option value="counter">Счётчик</option>
+              <option value="stages">Этапы</option>
+              <option value="checklist">Чеклист</option>
+              <option value="attendance">Посещаемость</option>
+              <option value="grades">Оценки</option>
+              <option value="deadlines">Дедлайны</option>
+              <option value="streak">Серия</option>
+              <option value="effort_hours">Трудозатраты</option>
+              <option value="rating_history">История оценок</option>
+            </select>
+            <input type="text" class="t-input t-input-sm metric-label-input"
+                   placeholder="Название трекера"
+                   aria-label="Название трекера">
+          </div>
+          <div class="metric-config-area"></div>
+          <button type="button" class="t-btn t-btn-primary t-btn-sm manual-metric-submit">Добавить</button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}
+
+{# ══ Модальное окно промта AI-трекера ══ #}
+<div class="t-modal-backdrop" id="aiPromptModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="ai-prompt-modal-title">
+  <div class="t-modal t-modal-sm">
+    <div class="t-modal-header">
+      <span class="t-modal-title" id="ai-prompt-modal-title">Промт трекера</span>
+      <button type="button" class="t-btn-icon t-modal-close-btn" onclick="closeModal('aiPromptModalBackdrop')" title="Закрыть">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="t-modal-body">
+      <p class="t-label">Запрос, который использовался при создании трекера через AI:</p>
+      <div class="t-ai-prompt-display" id="ai-prompt-text"></div>
+    </div>
+    <div class="t-modal-footer">
+      <button type="button" class="t-btn t-btn-outline" onclick="closeModal('aiPromptModalBackdrop')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+{# ══ Модальное окно переименования трекера ══ #}
+<div class="t-modal-backdrop" id="renameMetricModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="rename-metric-modal-title">
+  <div class="t-modal t-modal-sm">
+    <div class="t-modal-header">
+      <span class="t-modal-title" id="rename-metric-modal-title">Переименовать трекер</span>
+      <button type="button" class="t-btn-icon t-modal-close-btn" onclick="closeModal('renameMetricModalBackdrop')" title="Закрыть">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="t-modal-body">
+      <label class="t-label" for="rename-metric-input">Новое название</label>
+      <input type="text" class="t-input" id="rename-metric-input" aria-label="Новое название трекера">
+    </div>
+    <div class="t-modal-footer">
+      <button type="button" class="t-btn t-btn-outline" onclick="closeModal('renameMetricModalBackdrop')">Отмена</button>
+      <button type="button" class="t-btn t-btn-primary" id="rename-metric-confirm-btn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+{# ══ Модальное окно переименования ══ #}
+<div class="t-modal-backdrop" id="renameModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="rename-modal-title">
+  <div class="t-modal t-modal-sm">
+    <div class="t-modal-header">
+      <span class="t-modal-title" id="rename-modal-title">Переименовать</span>
+      <button type="button" class="t-btn-icon t-modal-close-btn" onclick="closeModal('renameModalBackdrop')" title="Закрыть">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="t-modal-body">
+      <label class="t-label" for="rename-input">Новое название</label>
+      <input type="text" class="t-input" id="rename-input" aria-label="Новое название">
+    </div>
+    <div class="t-modal-footer">
+      <button type="button" class="t-btn t-btn-outline" onclick="closeModal('renameModalBackdrop')">Отмена</button>
+      <button type="button" class="t-btn t-btn-primary" id="rename-confirm-btn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/subjects.js') }}"></script>
+<script src="{{ url_for('static', filename='js/metrics.js') }}"></script>
+<script>
+const SCHEDULE_ID = {{ schedule.id }};
+const CAN_EDIT = {{ 'true' if can_edit else 'false' }};
+
+document.querySelectorAll('.t-modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+</script>
+{% endblock %}

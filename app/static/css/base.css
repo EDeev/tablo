@@ -1,0 +1,128 @@
+/* ═══ CSS-переменные ════════════════════════════════════════════════════════ */
+:root,
+[data-theme="light"] {
+  --green:    #3D7A5F;
+  --mint:     #E8F5EE;
+  --bg:       #F9F9F8;
+  --surface:  #FFFFFF;
+  --surface2: #F4F4F3;
+  --ink:      #1A1A1A;
+  --muted:    #6B7280;
+  --border:   #E5E7EB;
+  --mono:     'JetBrains Mono', monospace;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --green:    #4A9B77;
+  --mint:     #1A2E25;
+  --bg:       #111110;
+  --surface:  #1C1C1B;
+  --surface2: #242423;
+  --ink:      #EDEDED;
+  --muted:    #71717A;
+  --border:   #2E2E2C;
+  --mono:     'JetBrains Mono', monospace;
+  color-scheme: dark;
+}
+
+/* ═══ Сброс ══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ═══ Страница ════════════════════════════════════════════════════════════════ */
+.t-page { max-width: 1080px; width: 100%; margin: 0 auto; padding: 28px 24px; flex: 1; }
+
+/* ═══ Заголовок раздела ═══════════════════════════════════════════════════════ */
+.t-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  margin-bottom: 14px;
+  margin-top: 32px;
+}
+.t-section-title-inline { margin: 0; }
+
+/* ═══ Шапка страницы (PH) ════════════════════════════════════════════════════ */
+.t-ph { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.t-ph-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+.t-ph-week { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.t-ph-right { margin-left: auto; display: flex; gap: 8px; }
+.t-ph-name-row { display: flex; align-items: center; gap: 8px; }
+
+/* ═══ Утилиты ════════════════════════════════════════════════════════════════ */
+.min-w-0 { min-width: 0; }
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.text-muted { color: var(--muted); }
+.text-green { color: var(--green); }
+.t-link { color: var(--green); text-decoration: none; }
+.t-link:hover { text-decoration: underline; }
+.mono { font-family: var(--mono); }
+.fw-bold { font-weight: 700; }
+.fw-semi { font-weight: 600; }
+.fs-small { font-size: 11.5px; }
+.hidden { display: none !important; }
+.t-muted { color: var(--muted); font-size: 13px; margin-left: 6px; }
+
+/* Layout-помощники */
+.row-center { display: flex; align-items: center; }
+.row-gap-8  { display: flex; align-items: center; gap: 8px; }
+.row-gap-6  { display: flex; align-items: center; gap: 6px; }
+.row-wrap   { display: flex; flex-wrap: wrap; gap: 4px; }
+.col-gap-6  { display: flex; flex-direction: column; gap: 6px; }
+.ml-auto    { margin-left: auto; }
+
+/* ═══ Empty state ════════════════════════════════════════════════════════════ */
+.t-empty {
+  text-align: center;
+  padding: 64px 0;
+  color: var(--muted);
+}
+.t-empty-icon { font-size: 40px; margin-bottom: 14px; }
+.t-empty p { font-size: 13px; margin-bottom: 14px; }
+
+/* ═══ Разделитель ════════════════════════════════════════════════════════════ */
+.t-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* ═══ Футер ══════════════════════════════════════════════════════════════════ */
+.t-footer {
+  max-width: 1080px;
+  width: 100%;
+  margin: 40px auto 24px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.t-footer-sep { opacity: .4; }
+.t-footer-link { color: var(--muted); text-decoration: none; }
+.t-footer-link:hover { color: var(--ink); }
+.t-footer-brand {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  text-decoration: none;
+}
+.t-footer-brand .t-brand-lo {
+  font-size: 12px;
+  padding: 1px 4px 2px;
+}

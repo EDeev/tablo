@@ -1,0 +1,110 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROGRESS BAR — накопление баллов
+   Акцент: #0ea5e9 (sky)
+
+   gh-1 (120px): кольцо SVG по центру, инпут и кнопка под ним компактно.
+   gh-2 (240px): кольцо слева, справа — значение + инпут + кнопка.
+   gh-3/4: кольцо крупнее, инпут шире, всё с воздухом.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Layout-обёртка ── */
+.t-pb-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Кольцо ── */
+.t-pb-ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+}
+.t-pb-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+.t-pb-ring-bg   { fill: none; stroke: var(--surface2); stroke-width: 8; }
+.t-pb-ring-fill {
+  fill: none;
+  stroke: #0ea5e9;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .45s cubic-bezier(.4,0,.2,1);
+}
+.t-pb-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #0ea5e9;
+  pointer-events: none;
+}
+
+/* ── Правая панель ── */
+.t-pb-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+.t-pb-val {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #0ea5e9;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.t-pb-val-max  { font-size: 12px; color: var(--muted); font-weight: 400; }
+.t-pb-input-row { display: flex; gap: 5px; }
+.t-pb-input-row .t-input { flex: 1; min-width: 0; }
+
+/* ── gh-1: кольцо + инпут горизонтально на одной строке ── */
+@container metric (max-height: 119px) {
+  .t-metric-body    { padding: 0 8px 8px; }
+  .t-pb-wrap        { gap: 8px; }
+  .t-pb-ring-wrap   { width: 56px; height: 56px; }
+  .t-pb-pct         { font-size: 11px; }
+  .t-pb-val         { font-size: 14px; }
+  .t-pb-val-max     { font-size: 10px; }
+  .t-pb-input-row .t-input { font-size: 11px; padding: 3px 6px; height: 26px; }
+  .t-pb-input-row .t-btn   { height: 26px; padding: 0 7px; }
+}
+
+/* ── gh-2: стандарт ── */
+@container metric (min-height: 120px) and (max-height: 239px) {
+  .t-pb-ring-wrap   { width: 72px; height: 72px; }
+  .t-pb-pct         { font-size: 13px; }
+  .t-pb-val         { font-size: 18px; }
+}
+
+/* ── gh-3/4: просторно, кольцо крупнее ── */
+@container metric (min-height: 360px) {
+  .t-pb-wrap        { flex-direction: column; align-items: center; gap: 14px; }
+  .t-pb-ring-wrap   { width: 110px; height: 110px; }
+  .t-pb-pct         { font-size: 18px; }
+  .t-pb-val         { font-size: 22px; text-align: center; }
+  .t-pb-right       { width: 100%; align-items: center; }
+  .t-pb-input-row   { width: 100%; }
+}
+
+/* ── gw-2/3: кольцо ещё крупнее ── */
+@container metric (min-width: 300px) and (min-height: 120px) and (max-height: 359px) {
+  .t-pb-ring-wrap   { width: 90px; height: 90px; }
+  .t-pb-pct         { font-size: 15px; }
+  .t-pb-val         { font-size: 22px; }
+}

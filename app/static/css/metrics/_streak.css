@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   STREAK — серия
+   Акцент: #f59e0b (amber)
+
+   gh-1: 🔥 + цифра горизонтально, кнопка компактная.
+   gh-2: огонь + цифра вертикально по центру + кнопка снизу.
+   gh-3/4: всё огромное.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.t-streak-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.t-streak-flame { font-size: 32px; line-height: 1; user-select: none; }
+.t-streak-num   {
+  font-size: 52px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #f59e0b;
+  line-height: 1;
+}
+.t-streak-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.t-streak-btn {
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11.5px;
+}
+
+/* ── gh-1: горизонтально ── */
+@container metric (max-height: 119px) {
+  .t-metric-body    { padding: 0 10px 8px; }
+  .t-streak-body    { flex-direction: row; gap: 8px; justify-content: center; }
+  .t-streak-flame   { font-size: 24px; }
+  .t-streak-num     { font-size: 34px; }
+  .t-streak-lbl     { display: none; }
+  .t-streak-btn     { width: auto; font-size: 10.5px; flex-shrink: 0; }
+}
+
+/* ── gh-2 ── */
+@container metric (min-height: 120px) and (max-height: 239px) {
+  .t-streak-flame { font-size: 28px; }
+  .t-streak-num   { font-size: 44px; }
+  .t-streak-lbl   { font-size: 10px; }
+}
+
+/* ── gh-3/4 ── */
+@container metric (min-height: 360px) {
+  .t-streak-flame { font-size: 48px; }
+  .t-streak-num   { font-size: 72px; }
+  .t-streak-lbl   { font-size: 14px; }
+  .t-streak-btn   { font-size: 13px; padding: 8px; }
+}
+
+/* ── gw-2/3 ── */
+@container metric (min-width: 260px) {
+  .t-streak-flame { font-size: 36px; }
+  .t-streak-num   { font-size: 60px; }
+}

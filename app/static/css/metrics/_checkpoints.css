@@ -1,0 +1,104 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHECKPOINTS — контрольные точки
+   Акцент: #6366f1 (indigo)
+
+   gh-1 (120px): бар + дробь X/N. Точки скрыты.
+   gh-2 (240px): бар + дробь + кнопки-точки в grid, заполняют пространство.
+   gh-3/4 (360-480px): то же + подписи под точками видны полностью.
+   Ширина: gw-1 компактно, gw-2/3 — точки крупнее, в несколько колонок.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Строка прогресса ── */
+.t-cp-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-bottom: 6px;
+}
+.t-cp-fraction {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: #6366f1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.t-cp-fraction-max { font-size: 10px; font-weight: 400; color: var(--muted); }
+.t-cp-track {
+  flex: 1;
+  height: 5px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.t-cp-fill {
+  height: 100%;
+  background: #6366f1;
+  border-radius: 99px;
+  transition: width .35s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Сетка кнопок ── */
+.t-cps {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 5px;
+  align-content: start;
+  overflow-y: auto;
+}
+.t-cp {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .12s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px;
+}
+.t-cp:hover  { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,.06); }
+.t-cp.done   { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+/* ── gh-1: только бар, точки скрыты ── */
+@container metric (max-height: 119px) {
+  .t-metric-body   { padding: 0 10px 8px; }
+  .t-cp-bar-row    { padding-bottom: 0; flex: 1; align-items: center; }
+  .t-cp-fraction   { font-size: 20px; }
+  .t-cps           { display: none; }
+}
+
+/* ── gh-2 (240px): стандарт ── */
+@container metric (min-height: 120px) and (max-height: 239px) {
+  .t-cp-fraction   { font-size: 14px; }
+  .t-cps           { grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 4px; }
+  .t-cp            { font-size: 10px; border-radius: 6px; }
+}
+
+/* ── gh-3/4: подписи ── */
+@container metric (min-height: 360px) {
+  .t-cp-fraction   { font-size: 16px; }
+  .t-cps           { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px; }
+  .t-cp            { aspect-ratio: unset; padding: 6px 4px; font-size: 12px; min-height: 40px; }
+}
+
+/* ── gw-2/3: точки крупнее ── */
+@container metric (min-width: 260px) {
+  .t-cps { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); }
+}
+@container metric (min-width: 380px) {
+  .t-cps { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); }
+  .t-cp  { font-size: 12px; }
+}

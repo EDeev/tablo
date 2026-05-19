@@ -1,0 +1,235 @@
+/* ═══ Сетка карточек предметов ══════════════════════════════════════════════ */
+.t-subj-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ═══ Карточка предмета ═════════════════════════════════════════════════════ */
+.t-subj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Шапка карточки — в стиле t-day-card-head */
+.t-subj-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.t-subj-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.t-subj-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.t-subj-type-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+.t-subj-head-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+/* Скрытый предмет — приглушённый вид карточки */
+.t-subj-card.subject-hidden { opacity: .5; }
+.t-subj-card.subject-hidden .t-subj-head { background: repeating-linear-gradient(
+  135deg, transparent, transparent 4px, rgba(128,128,128,.04) 4px, rgba(128,128,128,.04) 8px); }
+
+/* Кнопка видимости: активная (скрыто) — красноватый оттенок */
+.toggle-visibility-btn.subject-hidden { color: #ef4444 !important; }
+
+/* Секция внутри карточки */
+.t-subj-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.t-subj-section:last-child { border-bottom: none; }
+.t-subj-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.t-subj-section-head .t-subj-section-title { margin-bottom: 0; }
+.t-subj-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 8px;
+}
+
+/* Описание */
+.t-subj-desc { font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+.t-desc-italic { font-style: italic; }
+.t-subject-desc-form { display: none; margin-top: 6px; }
+.t-subject-desc-form.open { display: block; }
+.t-subj-desc-actions { display: flex; gap: 6px; margin-top: 6px; }
+
+/* Кнопки полей (переименование) */
+.t-subj-field-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+
+/* Добавить трекер */
+.t-subj-add-metric  { margin-top: 8px; }
+.t-add-metric-btns  { display: flex; gap: 6px; }
+.t-two-col          { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+/* Заголовок секции слотов (тип + период) */
+.t-subj-slots-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.t-subj-period-form { display: flex; }
+.t-subj-period-form .t-input-group { width: 200px; }
+
+/* Строка редактирования слота */
+.t-slot-edit-row td { padding: 3px 6px; }
+.t-slot-edit-row .t-input-sm { padding: 3px 7px; font-size: 12px; }
+.t-slot-edit-save-row { display: flex; gap: 2px; }
+
+/* Таблица слотов — нет верхнего отступа */
+.t-subj-slot-table { margin-top: 0; }
+
+/* Legacy-классы (используются в JS) */
+.t-subject-card { border-bottom: 1px solid var(--border); }
+.t-subject-name { font-weight: 600; font-size: 13px; }
+.t-desc-text { font-size: 12.5px; margin-bottom: 6px; }
+
+/* ═══ Страница предметов (legacy-обёртка) ════════════════════════════════════ */
+.t-subjects-page {
+  max-width: 900px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.t-subject-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface2);
+  cursor: pointer;
+  transition: background .12s;
+}
+.t-subject-card-head:hover { background: var(--bg); }
+.t-subject-body { padding: 12px 16px; }
+.t-subject-collapse { display: none; }
+.t-subject-collapse.open { display: block; }
+.t-subject-close-row { margin-left: auto; }
+.t-subject-fields-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.t-subject-desc-edit { display: flex; gap: 6px; margin-top: 6px; }
+.t-add-metric-btns { display: flex; gap: 6px; }
+
+/* ═══ Завершённость предмета ════════════════════════════════════════════════ */
+.t-subj-card.subject-completed { border-color: var(--color-green, #22c55e); }
+.t-subj-card.subject-completed .t-subj-head {
+  background: color-mix(in srgb, var(--color-green, #22c55e) 8%, var(--surface2));
+}
+
+.t-completed-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(34, 197, 94, .12);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, .3);
+}
+[data-theme="dark"] .t-completed-badge {
+  color: #4ade80;
+  background: rgba(34, 197, 94, .18);
+  border-color: rgba(34, 197, 94, .35);
+}
+
+.toggle-completed-btn.is-completed { color: #22c55e !important; }
+
+/* ═══ Тип сдачи: бейдж ══════════════════════════════════════════════════════ */
+.t-completion-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(167, 139, 250, .12);
+  color: #7c3aed;
+  border: 1px solid rgba(167, 139, 250, .3);
+}
+[data-theme="dark"] .t-completion-badge {
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, .18);
+  border-color: rgba(167, 139, 250, .35);
+}
+
+/* ═══ Мета-блок (тип сдачи + СДО) ══════════════════════════════════════════ */
+.t-subj-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+.t-subj-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 130px;
+}
+.t-subj-meta-item.t-subj-meta-sdo { flex: 1; }
+.t-subj-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.t-subj-meta-value { font-size: 13px; }
+.t-subj-sdo-edit { display: flex; gap: 4px; align-items: center; }
+.t-subj-sdo-edit .sdo-url-input { flex: 1; min-width: 0; }
+.t-subj-sdo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--accent, #6366f1);
+  text-decoration: none;
+}
+.t-subj-sdo-link:hover { text-decoration: underline; }
+
+/* ═══ Таблица слотов ════════════════════════════════════════════════════════ */
+.t-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.t-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.t-table td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.t-table tr:last-child td { border-bottom: none; }
+.t-table-actions { width: 52px; }
+.t-table-actions-cell { display: none; gap: 2px; }
+body.edit-mode .t-table-actions-cell { display: flex; }
+
+/* Добавить трекер */
+.t-add-metric-row { margin-top: 8px; display: flex; gap: 6px; }
+.t-metric-form { margin-top: 8px; display: none; }
+.t-metric-form.open { display: block; }
+.t-metric-input-row { display: flex; gap: 6px; }
+.t-ai-submit { border-radius: 0 8px 8px 0; }

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Новое расписание{% endblock %}
+{% block content %}
+
+<div class="t-ph">
+  <h1 class="t-ph-title">Добавить расписание</h1>
+</div>
+
+<div class="t-upload-card">
+  <form method="POST" enctype="multipart/form-data" id="upload-form" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="t-field">
+      <label class="t-label" for="sched-name">Название расписания</label>
+      <input type="text" name="name" id="sched-name" class="t-input"
+             placeholder="Например: 2 курс, осенний семестр" required
+             autocomplete="off">
+    </div>
+
+    <div class="t-field">
+      <label class="t-label" for="image-input">Изображение расписания</label>
+      <label class="t-file-drop" for="image-input" id="file-drop-zone" aria-label="Загрузить изображение">
+        <input type="file" name="image" id="image-input"
+               accept=".jpg,.jpeg,.png,.webp,.bmp" required>
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="t-upload-drop-text">Выберите или перетащите файл</div>
+        <div class="t-hint">JPG, PNG, WebP, BMP</div>
+      </label>
+      <div id="image-preview" class="t-image-preview">
+        <img id="preview-img" class="t-preview-img" alt="Предпросмотр расписания">
+        <button type="button" class="t-btn t-btn-ghost t-btn-sm t-change-file-btn" id="change-file-btn">
+          Выбрать другой файл
+        </button>
+        <input type="file" name="image_replace" id="image-input-replace"
+               accept=".jpg,.jpeg,.png,.webp,.bmp" hidden>
+      </div>
+    </div>
+
+    <div class="t-field">
+      <label class="t-label" for="extra-prompt">
+        Дополнительные указания для нейросети
+        <span class="text-muted fs-small">(необязательно)</span>
+      </label>
+      <textarea name="extra_prompt" id="extra-prompt" class="t-input t-textarea" rows="3"
+                placeholder="Например: таблица читается слева направо, первый столбец — день недели"></textarea>
+    </div>
+
+    <button type="submit" class="t-btn t-btn-primary t-btn-full" id="scan-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Сканировать расписание
+    </button>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showPreview(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('preview-img').src = ev.target.result;
+    document.getElementById('image-preview').classList.add('visible');
+    document.getElementById('file-drop-zone').classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('image-input').addEventListener('change', e => {
+  showPreview(e.target.files[0]);
+});
+
+document.getElementById('change-file-btn').addEventListener('click', () => {
+  document.getElementById('file-drop-zone').classList.remove('hidden');
+  document.getElementById('image-preview').classList.remove('visible');
+  document.getElementById('image-input').value = '';
+  document.getElementById('preview-img').src = '';
+});
+
+document.getElementById('upload-form').addEventListener('submit', () => {
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="t-spinner"></span> Сканирую...';
+});
+</script>
+{% endblock %}

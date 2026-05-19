@@ -1,0 +1,130 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAGES — этапы
+   Акцент: #8b5cf6 (violet)
+
+   gh-1: только точки горизонтально без подписей, активная — цветная.
+   gh-2: точки + подписи горизонтально, при overflow wrap в 2 строки.
+   gh-3/4: точки крупнее, подписи полные, коннекторы толще.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.t-stages {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+  gap: 0;
+}
+
+.t-stage-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Кнопка-этап: точка + подпись */
+.t-stage-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 3px 4px;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.t-stage-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: all .15s;
+  position: relative;
+  z-index: 1;
+}
+.t-stage-lbl {
+  font-size: 9.5px;
+  color: var(--muted);
+  line-height: 1.2;
+  text-align: center;
+  max-width: 52px;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+  transition: color .15s;
+}
+
+/* Горизонтальный коннектор между точками */
+.t-stage-conn {
+  height: 2px;
+  width: 16px;
+  min-width: 8px;
+  background: var(--border);
+  flex-shrink: 0;
+  /* центрируется по точке: padding-top кнопки (4px) + (28px/2) = 18px */
+  margin-top: 18px;
+  transition: background .15s;
+  border-radius: 1px;
+}
+.t-stage-conn.done { background: #8b5cf6; }
+
+/* Состояния */
+.t-stage-btn.done .t-stage-dot   { background: #8b5cf6; border-color: #8b5cf6; color: #fff; }
+.t-stage-btn.done .t-stage-lbl   { color: var(--ink); }
+.t-stage-btn.active .t-stage-dot {
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+  background: rgba(139,92,246,.1);
+  box-shadow: 0 0 0 3px rgba(139,92,246,.15);
+}
+.t-stage-btn.active .t-stage-lbl { color: var(--ink); font-weight: 600; }
+.t-stage-btn:hover .t-stage-dot  { border-color: #8b5cf6; }
+
+/* ── gh-1: только точки, без подписей ── */
+@container metric (max-height: 119px) {
+  .t-metric-body  { padding: 0 8px 8px; }
+  .t-stages       { align-content: center; justify-content: center; }
+  .t-stage-lbl    { display: none; }
+  .t-stage-btn    { padding: 4px 2px; }
+  .t-stage-dot    { width: 22px; height: 22px; font-size: 9px; }
+  .t-stage-conn   { width: 12px; margin-top: 15px; }
+}
+
+/* ── gh-2: подписи видны ── */
+@container metric (min-height: 120px) and (max-height: 239px) {
+  .t-stage-dot  { width: 26px; height: 26px; font-size: 10px; }
+  .t-stage-conn { width: 14px; margin-top: 17px; }
+  .t-stage-lbl  { max-width: 48px; font-size: 9px; white-space: normal; }
+}
+
+/* ── gh-3/4: крупно ── */
+@container metric (min-height: 360px) {
+  .t-stage-dot  { width: 36px; height: 36px; font-size: 12px; }
+  .t-stage-conn { width: 22px; height: 3px; margin-top: 22px; }
+  .t-stage-lbl  { font-size: 11px; max-width: 64px; white-space: normal; }
+  .t-stage-btn  { gap: 5px; padding: 6px 4px; }
+}
+
+/* ── gw-2/3: коннекторы шире ── */
+@container metric (min-width: 280px) {
+  .t-stage-conn { width: 24px; }
+  .t-stage-dot  { width: 30px; height: 30px; }
+  .t-stage-conn { margin-top: 19px; }
+  .t-stage-lbl  { max-width: 60px; font-size: 10px; white-space: normal; }
+}
+@container metric (min-width: 400px) {
+  .t-stage-conn { width: 32px; }
+  .t-stage-lbl  { max-width: 72px; }
+}

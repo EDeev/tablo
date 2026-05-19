@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Мои расписания{% endblock %}
+{% block content %}
+
+<div class="t-ph">
+  <h1 class="t-ph-title">Мои расписания</h1>
+  <div class="t-ph-right">
+    <a class="t-btn t-btn-primary" href="{{ url_for('schedules.upload') }}">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Добавить
+    </a>
+  </div>
+</div>
+
+{% if schedules %}
+<div class="t-sched-grid" id="sched-grid">
+  {% for s in schedules %}
+  <div class="t-sched-card">
+    <div class="t-sched-card-title">{{ s.name }}</div>
+    <div class="t-sched-card-meta">
+      <span>
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{ s.created_at.strftime('%d.%m.%Y') }}
+      </span>
+      <span>
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        {{ s.data | length }} предметов
+      </span>
+    </div>
+    <div class="t-sched-card-actions">
+      <a class="t-btn t-btn-primary t-btn-sm" href="{{ url_for('schedules.view', schedule_id=s.id) }}">Открыть</a>
+      <button type="button" class="t-btn t-btn-outline t-btn-sm share-btn" data-schedule-id="{{ s.id }}" title="Поделиться расписанием">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </button>
+      <form action="{{ url_for('schedules.delete', schedule_id=s.id) }}" method="POST"
+            onsubmit="return confirm('Удалить расписание «{{ s.name }}»?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="t-btn t-btn-danger t-btn-sm" title="Удалить расписание">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </form>
+    </div>
+    <div class="t-sched-card-footer">
+      <label class="t-form-check" for="merge-{{ s.id }}">
+        <input type="checkbox" class="merge-check" value="{{ s.id }}" id="merge-{{ s.id }}">
+        Выбрать для объединения
+      </label>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# Панель объединения #}
+<div class="t-merge-panel" id="merge-panel" hidden>
+  <div class="t-label t-merge-title">Объединить выбранные расписания</div>
+  <form action="{{ url_for('schedules.merge') }}" method="POST" id="merge-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div id="merge-ids"></div>
+    <div class="t-input-group">
+      <input type="text" name="name" class="t-input" placeholder="Название нового расписания" required
+             aria-label="Название нового расписания">
+      <button type="submit" class="t-btn t-btn-primary t-btn-group-end">Объединить</button>
+    </div>
+  </form>
+</div>
+
+{% else %}
+<div class="t-empty">
+  <div class="t-empty-icon">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="15" x2="9.01" y2="15" stroke-width="2"/><line x1="12" y1="15" x2="12.01" y2="15" stroke-width="2"/><line x1="15" y1="15" x2="15.01" y2="15" stroke-width="2"/></svg>
+  </div>
+  <p>Расписаний пока нет</p>
+  <a class="t-btn t-btn-primary" href="{{ url_for('schedules.upload') }}">Добавить первое</a>
+</div>
+{% endif %}
+
+{# Модальное окно шаринга #}
+<div class="t-modal-backdrop" id="shareModalBackdrop" role="dialog" aria-modal="true" aria-label="Поделиться расписанием">
+  <div class="t-modal">
+    <div class="t-modal-header">
+      <span class="t-modal-title">Поделиться расписанием</span>
+      <button type="button" class="t-btn-icon t-modal-close-btn" onclick="closeModal('shareModalBackdrop')" title="Закрыть">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="t-modal-body">
+      <div class="t-field">
+        <label class="t-label" for="link-view">Ссылка для просмотра</label>
+        <div class="t-input-group">
+          <input type="text" class="t-input" id="link-view" readonly aria-label="Ссылка для просмотра">
+          <button type="button" class="t-btn t-btn-outline t-share-copy-btn copy-btn" data-target="link-view" title="Скопировать">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="t-hint">Другие могут смотреть, но не редактировать</div>
+      </div>
+      <div class="t-field">
+        <label class="t-label" for="link-template">Ссылка-шаблон</label>
+        <div class="t-input-group">
+          <input type="text" class="t-input" id="link-template" readonly aria-label="Ссылка-шаблон">
+          <button type="button" class="t-btn t-btn-outline t-share-copy-btn copy-btn" data-target="link-template" title="Скопировать">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <div class="t-hint">Пользователь получит копию расписания</div>
+      </div>
+      <hr class="t-divider">
+      <div class="t-field">
+        <label class="t-label" for="editor-login">Добавить редактора</label>
+        <div class="t-input-group">
+          <input type="text" class="t-input" id="editor-login" placeholder="Логин пользователя" aria-label="Логин редактора">
+          <button type="button" class="t-btn t-btn-primary t-btn-group-end" id="add-editor-btn" title="Добавить редактора">Добавить</button>
+        </div>
+        <div class="t-hint">Редактор сможет изменять описания и трекеры</div>
+      </div>
+      <div id="editor-link-wrap" hidden class="t-field">
+        <label class="t-label" for="link-edit">Ссылка для редактора</label>
+        <div class="t-input-group">
+          <input type="text" class="t-input" id="link-edit" readonly aria-label="Ссылка для редактора">
+          <button type="button" class="t-btn t-btn-outline t-share-copy-btn copy-btn" data-target="link-edit" title="Скопировать">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.t-modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+let currentScheduleId = null;
+
+document.querySelectorAll('.share-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    currentScheduleId = btn.dataset.scheduleId;
+    for (const type of ['view', 'template']) {
+      const res = await apiFetch(`/schedules/${currentScheduleId}/share`, 'POST', { type });
+      if (res.ok)
+        document.getElementById(`link-${type}`).value = `${location.origin}/shared/${res.token}`;
+    }
+    document.getElementById('shareModalBackdrop').classList.add('open');
+  });
+});
+
+document.getElementById('add-editor-btn').addEventListener('click', async () => {
+  const login = document.getElementById('editor-login').value.trim();
+  if (!login) return;
+  const res = await apiFetch(`/schedules/${currentScheduleId}/share/editors`, 'POST', { login });
+  if (res.ok) {
+    document.getElementById('link-edit').value = `${location.origin}/shared/${res.token}`;
+    document.getElementById('editor-link-wrap').hidden = false;
+  } else {
+    alert(res.error || 'Ошибка');
+  }
+});
+
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById(btn.dataset.target).value);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => btn.innerHTML = orig, 1500);
+  });
+});
+
+/* Объединение расписаний */
+const mergePanel = document.getElementById('merge-panel');
+const mergeIds = document.getElementById('merge-ids');
+document.querySelectorAll('.merge-check').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const checked = document.querySelectorAll('.merge-check:checked');
+    mergePanel.hidden = checked.length < 2;
+    mergeIds.innerHTML = [...checked]
+      .map(c => `<input type="hidden" name="schedule_ids" value="${c.value}">`)
+      .join('');
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="t-auth-wrap">
+  <div class="t-auth-card">
+    <div class="t-auth-title">Вход в tablo</div>
+    <form method="POST" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="t-field">
+        <label class="t-label" for="login">Логин</label>
+        <input type="text" name="login" id="login" class="t-input" required autofocus
+               autocomplete="username" placeholder="Ваш логин">
+      </div>
+      <div class="t-field">
+        <label class="t-label" for="password">Пароль</label>
+        <input type="password" name="password" id="password" class="t-input" required
+               autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <div class="t-field">
+        <label class="t-form-check" for="remember">
+          <input type="checkbox" name="remember" id="remember">
+          Запомнить меня
+        </label>
+      </div>
+      <button type="submit" class="t-btn t-btn-primary t-btn-full">Войти</button>
+    </form>
+    <hr class="t-divider">
+    <div class="t-auth-footer">
+      Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрироваться</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

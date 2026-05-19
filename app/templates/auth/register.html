@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="t-auth-wrap">
+  <div class="t-auth-card">
+    <div class="t-auth-title">Регистрация</div>
+    <form method="POST" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="t-field">
+        <label class="t-label" for="login">Логин</label>
+        <input type="text" name="login" id="login" class="t-input" required autofocus
+               minlength="3" autocomplete="username" placeholder="Минимум 3 символа">
+        <div class="t-hint">Минимум 3 символа, уникальный</div>
+      </div>
+      <div class="t-field">
+        <label class="t-label" for="password">Пароль</label>
+        <input type="password" name="password" id="password" class="t-input" required
+               minlength="6" autocomplete="new-password" placeholder="Минимум 6 символов">
+      </div>
+      <div class="t-field">
+        <label class="t-label" for="confirm">Повторите пароль</label>
+        <input type="password" name="confirm" id="confirm" class="t-input" required
+               autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="t-btn t-btn-primary t-btn-full">Создать аккаунт</button>
+    </form>
+    <hr class="t-divider">
+    <div class="t-auth-footer">
+      Уже есть аккаунт? <a href="{{ url_for('auth.login') }}">Войти</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

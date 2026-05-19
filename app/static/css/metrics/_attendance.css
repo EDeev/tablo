@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATTENDANCE — посещаемость
+   Акцент: #ef4444 (red)
+
+   gh-1: три числа горизонтально — присут / пропуск / уваж. Форма скрыта.
+   gh-2: статы + точки-история + форма.
+   gh-3/4: всё с воздухом, точки крупнее.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Три статы */
+.t-att-stats {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.t-att-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 3px;
+  border-radius: 8px;
+  background: var(--surface2);
+  min-height: 44px;
+}
+.t-att-num {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--mono);
+  line-height: 1;
+}
+.t-att-lbl {
+  font-size: 8.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  text-align: center;
+  white-space: nowrap;
+}
+.t-att-stat--present .t-att-num { color: #16a34a; }
+.t-att-stat--absent  .t-att-num { color: #ef4444; }
+.t-att-stat--excused .t-att-num { color: #d97706; }
+[data-theme="dark"] .t-att-stat--present .t-att-num { color: #4ade80; }
+[data-theme="dark"] .t-att-stat--absent  .t-att-num { color: #f87171; }
+[data-theme="dark"] .t-att-stat--excused .t-att-num { color: #fbbf24; }
+
+/* Точки-история */
+.t-att-dots {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-content: flex-start;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.t-att-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: default;
+}
+.t-att-dot--present { background: #16a34a; }
+.t-att-dot--absent  { background: #ef4444; }
+.t-att-dot--excused { background: #d97706; }
+[data-theme="dark"] .t-att-dot--present { background: #4ade80; }
+[data-theme="dark"] .t-att-dot--absent  { background: #f87171; }
+[data-theme="dark"] .t-att-dot--excused { background: #fbbf24; }
+
+/* Форма */
+.t-att-form {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.t-att-form .t-input,
+.t-att-form .t-select { flex: 1; min-width: 0; }
+
+/* ── gh-1: только статы ── */
+@container metric (max-height: 119px) {
+  .t-metric-body  { padding: 0 8px 8px; }
+  .t-att-stats    { flex: 1; gap: 6px; }
+  .t-att-stat     { flex-direction: row; justify-content: center; gap: 6px; min-height: unset; padding: 6px 8px; }
+  .t-att-num      { font-size: 22px; }
+  .t-att-lbl      { font-size: 9px; margin-top: 0; }
+  .t-att-dots     { display: none; }
+  .t-att-form     { display: none; }
+}
+
+/* ── gh-2 ── */
+@container metric (min-height: 120px) and (max-height: 239px) {
+  .t-att-stat   { min-height: 38px; }
+  .t-att-num    { font-size: 18px; }
+  .t-att-dot    { width: 9px; height: 9px; }
+  .t-att-form .t-input,
+  .t-att-form .t-select { font-size: 11px; }
+}
+
+/* ── gh-3/4 ── */
+@container metric (min-height: 360px) {
+  .t-att-stat { min-height: 60px; border-radius: 10px; }
+  .t-att-num  { font-size: 28px; }
+  .t-att-lbl  { font-size: 10px; }
+  .t-att-dot  { width: 13px; height: 13px; }
+  .t-att-dots { gap: 4px; }
+}
+
+/* ── gw-2/3: статы крупнее ── */
+@container metric (min-width: 280px) {
+  .t-att-num { font-size: 24px; }
+  .t-att-dot { width: 11px; height: 11px; }
+}
