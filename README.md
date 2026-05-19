@@ -33,7 +33,7 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
-Заполните файл `.env` в корне проекта:
+Заполните файл `.env` в корне проекта
 
 Примените миграции и запустите приложение:
 
