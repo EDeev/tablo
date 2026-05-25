@@ -49,9 +49,11 @@
   gap: 5px;
   align-content: start;
   overflow-y: auto;
+  padding-right: 4px;
 }
 .t-cp {
-  aspect-ratio: 1;
+  aspect-ratio: unset;
+  min-height: 36px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   background: none;
@@ -84,7 +86,7 @@
 @container metric (min-height: 120px) and (max-height: 239px) {
   .t-cp-fraction   { font-size: 14px; }
   .t-cps           { grid-template-columns: repeat(auto-fill, minmax(32px, 1fr)); gap: 4px; }
-  .t-cp            { font-size: 10px; border-radius: 6px; }
+  .t-cp            { font-size: 10px; border-radius: 6px; aspect-ratio: unset; min-height: 32px; }
 }
 
 /* ── gh-3/4: подписи ── */

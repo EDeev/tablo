@@ -29,6 +29,17 @@
     </div>
     <div class="t-sched-card-actions">
       <a class="t-btn t-btn-primary t-btn-sm" href="{{ url_for('schedules.view', schedule_id=s.id) }}">Открыть</a>
+      <div class="t-export-dropdown">
+        <button type="button" class="t-btn t-btn-outline t-btn-sm t-export-toggle" title="Экспортировать расписание" aria-haspopup="true" aria-expanded="false">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <div class="t-export-menu" hidden>
+          <a class="t-export-item" href="{{ url_for('export.export_json', schedule_id=s.id) }}">JSON</a>
+          <a class="t-export-item" href="{{ url_for('export.export_csv', schedule_id=s.id) }}">CSV</a>
+          <a class="t-export-item" href="{{ url_for('export.export_pdf', schedule_id=s.id) }}">PDF</a>
+          <a class="t-export-item" href="{{ url_for('export.export_png', schedule_id=s.id) }}">PNG</a>
+        </div>
+      </div>
       <button type="button" class="t-btn t-btn-outline t-btn-sm share-btn" data-schedule-id="{{ s.id }}" title="Поделиться расписанием">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       </button>
@@ -167,6 +178,26 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.innerHTML = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
     setTimeout(() => btn.innerHTML = orig, 1500);
   });
+});
+
+/* Дропдаун экспорта */
+document.querySelectorAll('.t-export-toggle').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const menu = btn.nextElementSibling;
+    const open = !menu.hidden;
+    // закрыть все остальные
+    document.querySelectorAll('.t-export-menu').forEach(m => { m.hidden = true; });
+    document.querySelectorAll('.t-export-toggle').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    if (!open) {
+      menu.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.t-export-menu').forEach(m => { m.hidden = true; });
+  document.querySelectorAll('.t-export-toggle').forEach(b => b.setAttribute('aria-expanded', 'false'));
 });
 
 /* Объединение расписаний */

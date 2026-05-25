@@ -10,5 +10,9 @@ class Config:
         f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 1800,
+    }
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024
     WTF_CSRF_ENABLED = True

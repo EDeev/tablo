@@ -22,10 +22,11 @@ def create_app():
     login_manager.login_message = 'Войдите для доступа'
     login_manager.login_message_category = 'warning'
 
-    from app.routes import auth, schedules, subjects, shares
+    from app.routes import auth, schedules, subjects, shares, export
     app.register_blueprint(auth.bp)
     app.register_blueprint(schedules.bp)
     app.register_blueprint(subjects.bp)
     app.register_blueprint(shares.bp)
+    app.register_blueprint(export.bp)
 
     return app

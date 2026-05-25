@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>{{ schedule.name }}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  :root {
+    --green:   #3D7A5F;
+    --mint:    #E8F5EE;
+    --bg:      #F9F9F8;
+    --surface: #FFFFFF;
+    --surface2:#F4F4F3;
+    --ink:     #1A1A1A;
+    --muted:   #6B7280;
+    --border:  #E5E7EB;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 28px 24px;
+    min-width: 900px;
+  }
+
+  /* ── Заголовок ── */
+  .t-ph { margin-bottom: 22px; }
+  .t-ph-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+  .t-ph-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Сетка дней ── */
+  .t-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  /* ── Карточка дня ── */
+  .t-day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .t-day-card-head {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .t-day-name { font-size: 13px; font-weight: 600; }
+
+  /* ── Слот ── */
+  .t-slot {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .t-slot:last-child { border-bottom: none; }
+
+  .t-slot-time {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 66px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .t-slot-body { flex: 1; min-width: 0; }
+  .t-slot-name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .t-slot-room {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .t-slot-teacher-row {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .t-slot-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── Бейджи типов ── */
+  .t-type {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .t-type-blue   { background: #dbeafe; color: #1d4ed8; }
+  .t-type-green  { background: #dcfce7; color: #166534; }
+  .t-type-yellow { background: #fef9c3; color: #854d0e; }
+  .t-type-purple { background: #ede9fe; color: #5b21b6; }
+  .t-type-orange { background: #ffedd5; color: #9a3412; }
+  .t-type-red    { background: #fee2e2; color: #b91c1c; }
+  .t-type-teal   { background: #ccfbf1; color: #0f766e; }
+  .t-type-gray   { background: #f1f5f9; color: #475569; }
+
+  .t-empty-day {
+    padding: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="t-ph">
+  <div class="t-ph-title">{{ schedule.name }}</div>
+  <div class="t-ph-sub">Расписание · экспорт</div>
+</div>
+
+{% set TYPE_SHORT = {
+  'Лекция': 'Лек',
+  'Практика': 'Пр',
+  'Лаб. работа': 'Лаб',
+  'Лабораторная': 'Лаб',
+  'Семинар': 'Сем',
+  'Не указано': ''
+} %}
+
+<div class="t-grid">
+  {% for i in range(7) %}
+  {% set slots = week_view[i] %}
+  {% if slots %}
+  <div class="t-day-card">
+    <div class="t-day-card-head">
+      <span class="t-day-name">{{ days_display[i] }}</span>
+    </div>
+    {% for slot in slots %}
+    <div class="t-slot">
+      <div class="t-slot-time">{{ slot.time or '—' }}</div>
+      <div class="t-slot-body">
+        <span class="t-slot-name">{{ slot.subject }}</span>
+        {% if slot.classroom %}
+        <div class="t-slot-room">
+          <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ slot.classroom }}
+        </div>
+        {% endif %}
+        {% if slot.teacher %}
+        <div class="t-slot-teacher-row">
+          <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {{ slot.teacher }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="t-slot-right">
+        {% set t_short = TYPE_SHORT.get(slot.type, slot.type[:3] if slot.type and slot.type|length > 3 else slot.type) %}
+        {% if t_short and slot.type != 'Не указано' %}
+        <span class="t-type t-type-{{ slot.color or 'gray' }}">{{ t_short }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+</body>
+</html>
