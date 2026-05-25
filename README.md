@@ -33,14 +33,7 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
-Создайте файл `.env` в корне проекта:
-
-```env
-SECRET_KEY=your_secret_key
-DATABASE_URL=postgresql://user:password@localhost:5432/tablo
-OPENAI_API_KEY=your_api_key
-OPENAI_BASE_URL=https://api.your-provider.com/v1
-```
+Заполните файл `.env` в корне проекта
 
 Примените миграции и запустите приложение:
 
