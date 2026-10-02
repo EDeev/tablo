@@ -1,9 +1,11 @@
+import os
 import sys
+
 sys.dont_write_bytecode = True
 
-from app import create_app
+from app import create_app  # noqa: E402
 
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=os.getenv('FLASK_DEBUG') == '1')

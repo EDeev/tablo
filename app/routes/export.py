@@ -1,18 +1,10 @@
 import urllib.parse
 from flask import Blueprint, Response, redirect, url_for, flash
-from flask_login import login_required, current_user
+from flask_login import login_required
 from app.models.schedule import Schedule
-from app.models.share import Share
-from app import db
+from app.access import can_view as _can_view
 
 bp = Blueprint('export', __name__)
-
-
-def _can_view(schedule: Schedule) -> bool:
-    if schedule.user_id == current_user.id:
-        return True
-    share = Share.query.filter_by(schedule_id=schedule.id).first()
-    return share is not None
 
 
 @bp.route('/schedules/<int:schedule_id>/export/json')

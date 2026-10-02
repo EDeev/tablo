@@ -2,7 +2,7 @@ import csv
 import io
 import json
 
-from flask import current_app, render_template
+from flask import render_template
 
 DAYS_ORDER = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье']
 

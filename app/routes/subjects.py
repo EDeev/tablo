@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, current_app, jsonify, render_template, request
+from flask_login import login_required
 from sqlalchemy.orm.attributes import flag_modified
 from app import db, csrf
 from app.models.schedule import Schedule, SubjectConfig, COMPLETION_TYPES
 from app.models.metric import Metric, METRIC_TYPES, METRIC_LABELS
 from app.services.ai_metrics import generate_metric_from_prompt
+from app.access import can_edit as _check_edit_access
 
 bp = Blueprint('subjects', __name__)
 
@@ -87,8 +88,9 @@ def add_metric_ai(schedule_id, subject_name):
 
     try:
         result = generate_metric_from_prompt(subject_name, prompt)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception:
+        current_app.logger.exception('Ошибка генерации метрики')
+        return jsonify({'error': 'Не удалось сгенерировать метрику, попробуйте позже'}), 500
 
     cfg = _get_or_create_config(schedule_id, subject_name)
     metric = Metric(subject_config_id=cfg.id,
@@ -282,15 +284,6 @@ def _get_or_create_config(schedule_id: int, subject_name: str) -> SubjectConfig:
     return config
 
 
-def _check_edit_access(schedule: Schedule) -> bool:
-    if schedule.user_id == current_user.id:
-        return True
-    from app.models.share import Share, ShareEditor
-    share = Share.query.filter_by(schedule_id=schedule.id, share_type='edit').first()
-    if share:
-        return ShareEditor.query.filter_by(
-            share_id=share.id, user_id=current_user.id).first() is not None
-    return False
 
 
 def _render_metric_html(metric: Metric) -> str:

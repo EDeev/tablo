@@ -1,10 +1,10 @@
 import copy
-from flask import (Blueprint, render_template, redirect, url_for,
+from flask import (Blueprint, current_app, render_template, redirect, url_for,
                    flash, request, jsonify)
 from flask_login import login_required, current_user
 from app import db, csrf
 from app.models.schedule import Schedule, SubjectConfig
-from app.models.metric import Metric
+from app.access import can_edit as _can_edit, can_view as _can_view
 from app.services.ai_scan import scan_image
 from app.services.merge import merge_schedules_data
 from app.services.schedule_helpers import (
@@ -46,8 +46,9 @@ def upload():
         try:
             image_bytes = file.read()
             data = scan_image(image_bytes, ext, extra_prompt)
-        except Exception as e:
-            flash(f'Ошибка сканирования: {e}', 'danger')
+        except Exception:
+            current_app.logger.exception('Ошибка распознавания расписания')
+            flash('Не удалось распознать расписание. Попробуйте другое фото или повторите позже.', 'danger')
             return render_template('schedule/upload.html')
 
         schedule = Schedule(user_id=current_user.id, name=name, data=data)
@@ -198,9 +199,9 @@ def rename_subject_field(schedule_id, subject_name):
 
 def _replace_slot_field(item: dict, idx: int, value):
     """Меняет поле слота по индексу во всех типах и датах"""
-    for tn, type_data in item.get('types', {}).items():
+    for type_data in item.get('types', {}).values():
         date_ranges = type_data.get('dates', type_data) if isinstance(type_data, dict) and 'dates' in type_data else type_data
-        for dr, slots in date_ranges.items():
+        for slots in date_ranges.values():
             for slot in slots:
                 while len(slot) <= idx:
                     slot.append(None)
@@ -442,30 +443,3 @@ def delete_slot(schedule_id, subject_name):
     db.session.commit()
     return jsonify({'ok': True})
 
-
-# ─── Вспомогательные функции доступа ─────────────────────────────────────────
-
-def _can_view(schedule: Schedule) -> bool:
-    if schedule.user_id == current_user.id:
-        return True
-    from app.models.share import ShareEditor, Share
-    edit_share = Share.query.filter_by(schedule_id=schedule.id, share_type='edit').first()
-    if edit_share:
-        editor = ShareEditor.query.filter_by(
-            share_id=edit_share.id, user_id=current_user.id).first()
-        if editor:
-            return True
-    return False
-
-
-def _can_edit(schedule: Schedule) -> bool:
-    if schedule.user_id == current_user.id:
-        return True
-    from app.models.share import ShareEditor, Share
-    edit_share = Share.query.filter_by(schedule_id=schedule.id, share_type='edit').first()
-    if edit_share:
-        editor = ShareEditor.query.filter_by(
-            share_id=edit_share.id, user_id=current_user.id).first()
-        if editor:
-            return True
-    return False

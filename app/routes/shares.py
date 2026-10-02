@@ -2,11 +2,10 @@ from flask import (Blueprint, render_template, redirect, url_for,
                    flash, request, jsonify)
 from flask_login import login_required, current_user
 from app import db, csrf
-from app.models.schedule import Schedule, SubjectConfig
+from app.models.schedule import Schedule
 from app.models.share import Share, ShareEditor
 from app.models.user import User
 from app.services.schedule_helpers import build_week_view, get_week_dates, DAYS_DISPLAY, DAYS_RU
-from app.services.merge import merge_schedules_data
 from datetime import date
 
 bp = Blueprint('shares', __name__)

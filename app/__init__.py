@@ -9,9 +9,15 @@ migrate = Migrate()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-def create_app():
+def create_app(config_overrides=None):
     app = Flask(__name__)
     app.config.from_object('app.config.Config')
+    if config_overrides:
+        app.config.update(config_overrides)
+    if not app.config.get('SECRET_KEY'):
+        if not (app.debug or app.testing):
+            raise RuntimeError('Задайте SECRET_KEY: без него cookie сессий можно подделать')
+        app.config['SECRET_KEY'] = 'dev-only-secret'  # noqa: S105 — только для отладки и тестов
 
     db.init_app(app)
     migrate.init_app(app, db)
