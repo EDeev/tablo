@@ -5,11 +5,12 @@
 [![CI](https://github.com/EDeev/tablo/actions/workflows/ci.yml/badge.svg)](https://github.com/EDeev/tablo/actions/workflows/ci.yml)
 [![Docker](https://github.com/EDeev/tablo/actions/workflows/docker.yml/badge.svg)](https://github.com/EDeev/tablo/actions/workflows/docker.yml)
 [![Release](https://img.shields.io/github/v/release/EDeev/tablo)](https://github.com/EDeev/tablo/releases)
+[![License](https://img.shields.io/github/license/EDeev/tablo)](LICENSE)
 
 A web app for students: upload a photo of your timetable, and AI turns it into an editable schedule
 with per-subject progress trackers you can share by link.
 
-**Status:** coursework project (2026), completed · live at [tablo.deev.su](https://tablo.deev.su)
+**Status:** personal project that started as coursework (2026) · live at [tablo.deev.su](https://tablo.deev.su)
 
 ![Weekly schedule and trackers](docs/screenshots/schedule.png)
 
@@ -106,8 +107,7 @@ and runs the same checks on every push.
 
 ## License
 
-Coursework project (Moscow Polytechnic University, 2025/26). The code is open for study; there is no
-separate license.
+MIT — see [LICENSE](LICENSE).
 
 ## Author
 

@@ -5,11 +5,12 @@
 [![CI](https://github.com/EDeev/tablo/actions/workflows/ci.yml/badge.svg)](https://github.com/EDeev/tablo/actions/workflows/ci.yml)
 [![Docker](https://github.com/EDeev/tablo/actions/workflows/docker.yml/badge.svg)](https://github.com/EDeev/tablo/actions/workflows/docker.yml)
 [![Release](https://img.shields.io/github/v/release/EDeev/tablo)](https://github.com/EDeev/tablo/releases)
+[![License](https://img.shields.io/github/license/EDeev/tablo)](LICENSE)
 
 Веб-приложение для студентов: по фото расписания ИИ собирает редактируемое расписание, к каждому
 предмету можно добавить трекеры успеваемости и поделиться всем по ссылке.
 
-**Статус:** учебный проект (курсовая работа, 2026), завершён · работает на [tablo.deev.su](https://tablo.deev.su)
+**Статус:** личный проект, начинался как курсовая работа (2026) · работает на [tablo.deev.su](https://tablo.deev.su)
 
 ![Расписание на неделю и трекеры](docs/screenshots/schedule.png)
 
@@ -106,8 +107,7 @@ ruff check . && pytest
 
 ## Лицензия
 
-Учебный проект (курсовая работа, Московский Политех, 2025/26). Код открыт для изучения, отдельной
-лицензии нет.
+MIT — см. [LICENSE](LICENSE).
 
 ## Автор
 
