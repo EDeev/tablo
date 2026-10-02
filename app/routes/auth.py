@@ -1,9 +1,18 @@
+from urllib.parse import urlsplit
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.models.user import User
 
 bp = Blueprint('auth', __name__)
+
+
+def _is_safe_next(target: str) -> bool:
+    """Переход после входа — только на страницы этого же сайта (защита от открытого редиректа)."""
+    parts = urlsplit(target)
+    return (bool(target) and target.startswith('/') and not target.startswith(('//', '/\\'))
+            and not parts.netloc and not parts.scheme)
 
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -42,8 +51,10 @@ def login():
         user = User.query.filter_by(login=login).first()
         if user and user.check_password(password):
             login_user(user, remember=bool(request.form.get('remember')))
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('schedules.profile'))
+            next_page = request.args.get('next', '')
+            if not _is_safe_next(next_page):
+                next_page = url_for('schedules.profile')
+            return redirect(next_page)
         flash('Неверный логин или пароль', 'danger')
     return render_template('auth/login.html')
 
