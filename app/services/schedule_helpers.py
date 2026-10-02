@@ -12,8 +12,13 @@ def _parse_date_range(dr: str):
     try:
         start_str, end_str = dr[:5], dr[6:]
         year = date.today().year
-        start = date(year, int(start_str[3:5]), int(start_str[0:2]))
-        end = date(year, int(end_str[3:5]), int(end_str[0:2]))
+        start_month, start_day = int(start_str[3:5]), int(start_str[0:2])
+        end_month, end_day = int(end_str[3:5]), int(end_str[0:2])
+        start = date(year, start_month, start_day)
+        # Период может пересекать Новый год (например "01.09-03.01") —
+        # тогда конец периода относится к следующему году
+        end_year = year if (end_month, end_day) >= (start_month, start_day) else year + 1
+        end = date(end_year, end_month, end_day)
         return start, end
     except Exception:
         return None, None
@@ -36,6 +41,17 @@ def _merge_same_subject(slots: list) -> dict:
     return merged
 
 
+def _time_sort_key(time_str):
+    """Ключ сортировки по времени начала занятия (устойчив к '9:00' вместо '09:00')"""
+    if time_str:
+        try:
+            h, m = time_str.split('-', 1)[0].strip().split(':')
+            return (int(h), int(m))
+        except (ValueError, IndexError):
+            pass
+    return (99, 99)
+
+
 def _group_by_time(slots: list) -> list:
     """Группирует слоты по времени; один предмет — мёрджит поля; разные предметы — группа"""
     by_time = defaultdict(list)
@@ -43,7 +59,7 @@ def _group_by_time(slots: list) -> list:
         by_time[slot.get('time') or ''].append(slot)
 
     result = []
-    for time_key in sorted(by_time.keys()):
+    for time_key in sorted(by_time.keys(), key=_time_sort_key):
         group = by_time[time_key]
         subjects = {s['subject'] for s in group}
         if len(subjects) == 1:
@@ -87,7 +103,7 @@ def build_day_view(schedule_data: list, target_date: date) -> list:
                         'day':        day_name,
                     })
 
-    raw.sort(key=lambda x: x.get('time') or '')
+    raw.sort(key=lambda x: _time_sort_key(x.get('time')))
     return _group_by_time(raw)
 
 

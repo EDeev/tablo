@@ -66,7 +66,7 @@ def export_csv(schedule) -> bytes:
 def _build_week_view_active(schedule_data: list) -> dict:
     """Слоты по дням — только из периодов, которые ещё не закончились на сегодня."""
     from datetime import date
-    from app.services.schedule_helpers import _parse_date_range
+    from app.services.schedule_helpers import _parse_date_range, _time_sort_key
     today = date.today()
     days = {i: [] for i in range(7)}
     for item in schedule_data:
@@ -106,7 +106,7 @@ def _build_week_view_active(schedule_data: list) -> dict:
             if key not in seen:
                 seen.add(key)
                 unique.append(s)
-        days[i] = sorted(unique, key=lambda s: s.get('time') or '')
+        days[i] = sorted(unique, key=lambda s: _time_sort_key(s.get('time')))
     return days
 
 
