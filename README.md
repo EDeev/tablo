@@ -35,7 +35,7 @@ docker compose up -d
 ```
 
 Откройте `http://localhost:8000`. Compose поднимает приложение и PostgreSQL, миграции применяются
-при старте. Готовый образ: `docker pull ghcr.io/edeev/tablo` или `docker pull dcr.deev.su/edeev/tablo`.
+при старте. Готовый образ: `docker pull ghcr.io/edeev/tablo` или `docker pull git.deev.su/edeev/tablo`.
 
 ## Установка без Docker
 
@@ -91,7 +91,7 @@ flowchart LR
 
 [tablo.deev.su](https://tablo.deev.su) работает на VPS: gunicorn под systemd за nginx с сертификатом
 Let's Encrypt, PostgreSQL — на отдельном сервере, ИИ — Timeweb Cloud AI. Docker-образ собирает GitHub
-Actions на каждый тег `v*` и публикует в GitHub Packages и в реестр `dcr.deev.su`.
+Actions на каждый тег `v*` и публикует в GitHub Packages и в реестр `git.deev.su`.
 
 ## Разработка
 

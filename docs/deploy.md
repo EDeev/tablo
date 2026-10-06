@@ -12,7 +12,7 @@ docker compose up -d
 
 ```bash
 docker pull ghcr.io/edeev/tablo:latest
-docker pull dcr.deev.su/edeev/tablo:latest
+docker pull git.deev.su/edeev/tablo:latest
 ```
 
 Образ большой (около 1,3 ГБ): в нём Chromium для экспорта расписания в PNG.

@@ -35,7 +35,7 @@ docker compose up -d
 ```
 
 Open `http://localhost:8000`. Compose starts the app and PostgreSQL; migrations run on startup.
-Prebuilt image: `docker pull ghcr.io/edeev/tablo` or `docker pull dcr.deev.su/edeev/tablo`.
+Prebuilt image: `docker pull ghcr.io/edeev/tablo` or `docker pull git.deev.su/edeev/tablo`.
 
 ## Installing without Docker
 
@@ -91,7 +91,7 @@ Details (in Russian):
 
 [tablo.deev.su](https://tablo.deev.su) runs on a VPS: gunicorn under systemd behind nginx with a
 Let's Encrypt certificate; PostgreSQL runs on a separate server; AI is Timeweb Cloud AI. GitHub Actions
-builds the Docker image on every `v*` tag and publishes it to GitHub Packages and to `dcr.deev.su`.
+builds the Docker image on every `v*` tag and publishes it to GitHub Packages and to `git.deev.su`.
 
 ## Development
 
